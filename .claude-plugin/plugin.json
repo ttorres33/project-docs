@@ -1,0 +1,19 @@
+{
+  "name": "project-docs",
+  "version": "0.1.0",
+  "description": "Maintains project documentation with process-notes.md for work history and README.md for current state",
+  "author": {
+    "name": "Teresa Torres",
+    "email": "contact@producttalk.org"
+  },
+  "homepage": "https://github.com/ttorres33/project-docs",
+  "repository": "https://github.com/ttorres33/project-docs",
+  "keywords": [
+    "documentation",
+    "process-notes",
+    "readme",
+    "project-history",
+    "context-management"
+  ],
+  "license": "MIT"
+}
