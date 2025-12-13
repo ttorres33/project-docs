@@ -13,6 +13,10 @@ claude plugins add ttorres33/project-docs
 
 ## Commands
 
+### `/project-docs:about`
+
+Show this README for help and usage information.
+
 ### `/project-docs:process-notes`
 
 Document current session progress to `process-notes.md`. Creates a comprehensive entry capturing:
