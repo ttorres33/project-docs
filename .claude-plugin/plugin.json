@@ -1,6 +1,6 @@
 {
   "name": "project-docs",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Maintains project documentation with process-notes.md for work history and README.md for current state",
   "author": {
     "name": "Teresa Torres",

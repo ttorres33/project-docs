@@ -1,1 +1,4 @@
 .DS_Store
+
+# Internal working documentation - not for version control
+process-notes.md
