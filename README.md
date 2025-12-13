@@ -1,9 +1,10 @@
 # project-docs
 
-A Claude Code plugin for maintaining project documentation with two complementary files:
+A Claude Code plugin for maintaining project documentation:
 
 - **process-notes.md** - Work history documenting decisions, dead ends, and progress
 - **README.md** - Current state documentation for users and contributors
+- **A/B test docs** - Structured documentation for experiments and tests
 
 ## Installation
 
@@ -36,14 +37,29 @@ Update `README.md` to reflect the current project state:
 - Configuration options
 - Development setup
 
+### `/project-docs:ab-test <test-name> [file-path]`
+
+Document an A/B test interactively. Creates or updates a structured document capturing:
+- Test date
+- Hypothesis
+- Control and treatment variants (name + description)
+- How success will be measured
+- When results will be evaluated
+- Results and conclusions (filled in when test completes)
+
+Arguments:
+- `test-name` (required): Name of the test
+- `file-path` (optional): Where to save. Defaults to `./{test-name}.md`
+
 ## Skills
 
-Both commands have corresponding skills that Claude can invoke proactively:
+All commands have corresponding skills that Claude can invoke proactively:
 
 - **process-notes** - Triggers when context window fills up (~90%), at key milestones, or on explicit request
 - **readme** - Triggers when structural/behavior/config changes occur, features are added/removed, or on explicit request
+- **ab-test** - Triggers when user mentions running an A/B test, comparing variants, or wanting to measure something systematically
 
-**Note:** Claude doesn't consistently invoke skills automatically. Rely on the slash commands (`/project-docs:process-notes` and `/project-docs:readme`) to ensure documentation gets updated.
+**Note:** Claude doesn't consistently invoke skills automatically. Rely on the slash commands to ensure documentation gets updated.
 
 ## When to Use Each
 
