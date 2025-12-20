@@ -7,7 +7,13 @@ allowed-tools: Read, Edit, Write, Glob, Grep
 # README Documentation Skill
 
 ## Purpose
-Keep the project `README.md` up-to-date with the current state of the project. Unlike `process-notes.md` which maintains historical context, the README should reflect how the project works RIGHT NOW - its current structure, features, and usage.
+Keep the project `README.md` up-to-date with what the project is and how to use it. The README is the entry point for users and contributors - it answers "What is this and how do I use it?"
+
+**Key distinction:**
+- **README.md** = "What is this and how do I use it" (setup, deploy, test)
+- **ARCHITECTURE.md** = "How is this designed and why" (design, patterns, conventions)
+
+README should reflect how the project works RIGHT NOW - its current status, structure, and usage. Link to ARCHITECTURE.md for design details.
 
 ## When to Update
 
@@ -38,46 +44,46 @@ Use this general structure, adapting sections as appropriate for the project:
 
 [Brief description - 1-2 sentences explaining what this project does]
 
+## Current Status
+
+[What's working, what's ready, what's in progress]
+
 ## Quick Start
 
 [Minimal steps to get up and running - installation and basic usage]
 
-## Features
+## Project Structure
 
-[High-level list of what the project can do]
+[File tree showing key directories and their purpose]
 
 ## Installation
 
 [Detailed installation steps, prerequisites, dependencies]
 
-## Usage
+## Dependencies
 
-[Basic usage examples showing common tasks]
-[Link to detailed usage docs if they exist: See [docs/usage.md](docs/usage.md) for more examples]
-
-## Architecture
-
-[High-level overview of how the system is structured]
-[Key components and how they interact]
-[Important design decisions]
-[Link to detailed architecture docs: See [docs/architecture.md](docs/architecture.md) for detailed design]
+[External dependencies, imported stacks, required services]
 
 ## Configuration
 
-[Overview of configuration options - environment variables, config files]
+[SSM parameters required, environment variables, config files]
 [Link to detailed config docs: See [docs/configuration.md](docs/configuration.md) for all options]
+
+## Deployment
+
+[How to deploy - deploy.sh, sync-prompts.sh, etc.]
+[Key deployment steps and scripts]
 
 ## Development
 
 [How to set up development environment]
-[How to run tests]
+[How to run tests - unit tests, integration tests]
+[Development workflows - prompt testing, local testing, etc.]
 [Link to contributing guide if exists: See [CONTRIBUTING.md](CONTRIBUTING.md)]
 
 ## Documentation
 
-- [Architecture Details](docs/architecture.md)
-- [API Documentation](docs/api.md)
-- [Configuration Guide](docs/configuration.md)
+- [Architecture & Design](ARCHITECTURE.md) - How the system is designed and why
 - [Additional docs as needed]
 
 ## License
@@ -85,70 +91,85 @@ Use this general structure, adapting sections as appropriate for the project:
 [License information if applicable]
 ```
 
-## Guidelines for High-Level Overview
+## Guidelines
 
 ### Keep It Brief
 - README is the entry point - provide overview, not exhaustive detail
 - Each section should be scannable and concise
 - Use bullet points for lists
-- Link to detailed docs in `docs/` folder for deep dives
+- Link to ARCHITECTURE.md for design details
+- Link to docs/ folder for deep dives on specific topics
 
-### Architecture Section
-- Describe the high-level structure (e.g., "Three-tier architecture: API layer, business logic, data access")
-- List major components and their responsibilities
-- Explain key design decisions briefly (e.g., "Uses event-driven architecture for scalability")
-- Always link to `docs/architecture.md` for detailed design documentation
+### Project Structure Section
+- Show the file tree with key directories
+- Brief description of what each directory contains
 - Example:
   ```markdown
-  ## Architecture
+  ## Project Structure
 
-  The system uses a modular architecture with three main components:
-
-  - **API Layer** (`src/api/`) - REST endpoints for client interaction
-  - **Service Layer** (`src/services/`) - Business logic and orchestration
-  - **Data Layer** (`src/data/`) - Database access and caching
-
-  Key design decisions:
-  - Event-driven communication between services for loose coupling
-  - Repository pattern for data access to support multiple storage backends
-
-  See [docs/architecture.md](docs/architecture.md) for detailed architecture documentation.
+  ```
+  project/
+  ├── lambdas/           # Lambda function handlers
+  ├── step-functions/    # Step Function definitions
+  ├── prompts/           # LLM prompt templates
+  ├── tests/             # Unit and integration tests
+  └── template.yaml      # SAM template
+  ```
   ```
 
 ### Configuration Section
+- List SSM parameters required
 - List environment variables with brief descriptions
 - Mention config file locations
-- Provide one or two simple examples
-- Link to `docs/configuration.md` for comprehensive configuration guide
 - Example:
   ```markdown
   ## Configuration
 
-  Configure via environment variables:
+  ### SSM Parameters
+  - `/app/openai-api-key` - OpenAI API key
+  - `/app/airtable-token` - Airtable API token
 
-  - `DATABASE_URL` - PostgreSQL connection string
-  - `API_PORT` - Port for API server (default: 3000)
+  ### Environment Variables
+  - `STAGE` - Deployment stage (dev, prod)
   - `LOG_LEVEL` - Logging verbosity (debug, info, warn, error)
-
-  See [docs/configuration.md](docs/configuration.md) for all configuration options.
   ```
 
-### Usage Section
-- Show the most common use cases (1-3 examples)
-- Keep examples simple and self-contained
-- Link to detailed usage documentation for advanced scenarios
+### Deployment Section
+- List deployment scripts and what they do
+- Show the basic deployment command
 - Example:
   ```markdown
-  ## Usage
+  ## Deployment
 
-  Basic example:
+  ```bash
+  # Deploy all infrastructure
+  ./deploy.sh
 
-  \`\`\`javascript
-  const client = new APIClient({ apiKey: process.env.API_KEY });
-  const result = await client.fetchData({ id: 123 });
-  \`\`\`
+  # Sync prompts to S3
+  ./sync-prompts.sh
 
-  See [docs/usage.md](docs/usage.md) for more examples and advanced usage.
+  # Deploy dashboard only
+  ./deploy-dashboard.sh
+  ```
+  ```
+
+### Development Section
+- How to run tests
+- Key development workflows
+- Example:
+  ```markdown
+  ## Development
+
+  ```bash
+  # Run unit tests
+  npm test
+
+  # Test prompts locally
+  ./test-prompt.sh prompt-name
+
+  # Run integration tests
+  npm run test:integration
+  ```
   ```
 
 ## Update Strategies
@@ -243,81 +264,87 @@ DO update for:
 ## Example README
 
 ```markdown
-# Task Management CLI
+# Canvas Coach API
 
-A command-line tool for managing tasks and projects using markdown files and Obsidian.
+Serverless API for coaching users through the Business Fundamentals Canvas.
+
+## Current Status
+
+- Canvas extraction: Working
+- Coaching flow: Working
+- Dashboard: In development
 
 ## Quick Start
 
 \`\`\`bash
-# Install dependencies
-pip install -r requirements.txt
+# Deploy to AWS
+./deploy.sh
 
-# Import Trello cards
-python scripts/import-trello.py export.json list-id
-
-# Generate daily task files
-python scripts/generate-daily-files.py
+# Sync prompts
+./sync-prompts.sh
 \`\`\`
 
-## Features
+## Project Structure
 
-- Import tasks from Trello boards
-- Organize tasks by due date (today, this week, next week)
-- Track recurring tasks with automatic date updates
-- Markdown-based for use with Obsidian or any text editor
-- Archive completed tasks automatically
+\`\`\`
+project/
+├── lambdas/           # Lambda function handlers
+├── step-functions/    # Step Function state machines
+├── prompts/           # LLM prompt templates
+├── dashboard/         # React dashboard
+├── tests/             # Unit and integration tests
+└── template.yaml      # SAM infrastructure
+\`\`\`
 
-## Architecture
+## Dependencies
 
-The system uses a file-based architecture:
-
-- **Task files** (`tasks/*.md`) - Individual task definitions with YAML frontmatter
-- **View files** (`today.md`, `this-week.md`, etc.) - Generated aggregations of tasks by due date
-- **Scripts** (`scripts/*.py`) - Automation for imports, date calculations, file generation
-- **Templates** (`templates/*.md`) - Reusable task templates
-
-Key design decisions:
-- Markdown + YAML frontmatter for human readability and git-friendliness
-- File-based storage (no database) for simplicity and portability
-- Python scripts for automation while keeping data in plain text
-
-See [docs/architecture.md](docs/architecture.md) for detailed architecture documentation.
+- Imports `shared-infrastructure` stack for VPC and common resources
+- Requires OpenAI API access
+- Requires Airtable for data storage
 
 ## Configuration
 
-Tasks use YAML frontmatter:
+### SSM Parameters
+- `/canvas-coach/openai-api-key` - OpenAI API key
+- `/canvas-coach/airtable-token` - Airtable API token
 
-\`\`\`yaml
----
-type: task | idea | template | memory
-due: YYYY-MM-DD
-recurrence: monthly | weekly | quarterly
-tags: [tag1, tag2]
----
+### Environment Variables
+- `STAGE` - Deployment stage (dev, prod)
+
+## Deployment
+
+\`\`\`bash
+# Full deployment
+./deploy.sh
+
+# Sync prompts only
+./sync-prompts.sh
+
+# Deploy dashboard
+./deploy-dashboard.sh
 \`\`\`
-
-See [CLAUDE.md](CLAUDE.md) for complete configuration guide.
 
 ## Development
 
 \`\`\`bash
-# Run tests
-python -m pytest
+# Run unit tests
+npm test
 
-# Check for new Trello cards
-python scripts/trello_mcp_server.py
+# Test a prompt locally
+./test-prompt.sh coaching-prompt
+
+# Run canvas extraction test
+./test-extraction.sh sample.pdf
 \`\`\`
 
 ## Documentation
 
-- [Architecture Details](docs/architecture.md)
-- [Task Management Guide](CLAUDE.md)
-- [Script Documentation](scripts/README.md)
+- [Architecture & Design](ARCHITECTURE.md) - System design, data model, patterns
+- [Prompt Guide](docs/prompts.md) - How to write and test prompts
 
 ## License
 
-Personal project - not licensed for public use
+Proprietary
 ```
 
 ## File Location
@@ -326,66 +353,50 @@ Personal project - not licensed for public use
 - If README doesn't exist, create it using the standard structure
 - Never create README in subdirectories unless explicitly requested
 
-## When to Use README vs Process-Notes
+## When to Use README vs ARCHITECTURE.md vs Process-Notes
 
 ### Use README For:
-- **The destination** - What the project is RIGHT NOW
-- **Current state** - How it works today, not how it used to work
-- **External-facing** - Documentation for users/contributors
-- **Getting started** - How to install, configure, use the project
-- **Current architecture** - How the system is structured now
-- **No history** - Only what's true today, no "we used to..." or "we tried..."
+- **What and how to use** - What the project is and how to use it
+- **Current status** - What's working, what's ready
+- **Getting started** - How to install, deploy, configure
+- **Project structure** - File tree overview
+- **Development workflows** - How to test, how to develop
+- **No design details** - Link to ARCHITECTURE.md for that
+
+### Use ARCHITECTURE.md For:
+- **How it's designed** - System flow, data model, infrastructure
+- **Why it's designed that way** - Design decisions, trade-offs
+- **Patterns to follow** - Conventions for adding new code
+- **Technical specs** - API contracts, data schemas, workflows
 
 ### Use Process-Notes For:
-- **The journey** - How we got here, what we tried, why we made decisions
+- **The journey** - How we got here, what we tried
 - **Historical context** - What happened when, in chronological order
-- **Learning from failures** - Dead ends, errors, what didn't work and why
+- **Dead ends** - What didn't work and why
 - **Decision rationale** - Why we chose X over Y, alternatives considered
-- **Session continuity** - Context for next agent to pick up where we left off
-- **Work-in-progress** - Documenting as we go, even incomplete work
-
-### Common Scenarios
-
-| Scenario | README | Process-Notes | Both? |
-|----------|--------|---------------|-------|
-| **Just added OAuth authentication** | Yes - Update to show OAuth is now available, how to configure it | Yes - Document why we chose OAuth, what we tried first, implementation decisions | Both |
-| **Debugged tricky issue for 2 hours** | No - Unless it changes how the project works or needs documentation | Yes - Document the debugging journey, what we learned, the solution | Process-Notes only |
-| **Refactored file structure but behavior unchanged** | Maybe - If file paths in docs need updating | Maybe - If significant decisions were made about structure | Use judgment |
-| **Added new feature (e.g., export to CSV)** | Yes - Update features list, add usage example | Yes - How we built it, libraries chosen, design decisions | Both |
-| **Changed API endpoint structure** | Yes - Update API docs to reflect new structure | Yes - Why we changed it, migration path, breaking change reasoning | Both |
-| **Fixed bug that restores documented behavior** | No - Behavior already documented correctly | Maybe - Only if debugging revealed important insights | Usually Process-Notes only |
-| **Added environment variable** | Yes - Update configuration section | Yes - Why we needed it, what we considered | Both |
-| **Spent time researching library options** | No - Unless we actually added the library | Yes - What we evaluated, pros/cons, final choice | Process-Notes only (until implementation) |
-| **Reorganized code but kept same public API** | No - Internal structure doesn't affect users | Maybe - If architectural decisions were made | Usually Process-Notes only |
-| **Context window approaching 90%** | No - Unless meaningful changes to document | Yes - Checkpoint current progress | Process-Notes only (checkpoint) |
-| **Completed major milestone** | Maybe - If milestone adds/changes features | Yes - Document what we accomplished, decisions made | Process-Notes always, README if user-facing changes |
+- **Session continuity** - Context for next session
 
 ### Quick Decision Guide
 
 **Update README if:**
-- External behavior changed (how users interact with it)
-- Features added or removed
-- Installation/setup steps changed
-- Configuration options changed
-- Architecture changed in a way that affects understanding
+- Deployment or setup steps changed
+- Project structure changed
+- New configuration options
+- Development workflow changed
+- Status of features changed
+
+**Update ARCHITECTURE.md if:**
+- New infrastructure resources
+- Data model changes
+- New patterns established
+- API contracts changed
+- Design decisions made
 
 **Update Process-Notes if:**
-- We made a decision (any decision worth remembering)
-- We hit a dead end or learned something
+- Made a decision worth remembering
+- Hit a dead end or learned something
 - Context window is getting full
-- We completed work on something (even if not fully done)
-- Future us needs to understand why we did something
-
-**Update both if:**
-- We added a new feature (README: what it does, process-notes: how/why)
-- We made breaking changes (README: new API, process-notes: migration reasoning)
-- We changed project structure in user-visible ways
-
-**Update neither if:**
-- Pure code cleanup with no behavioral change
-- Minor bug fixes that restore documented behavior
-- Internal refactoring invisible to users
-- Just reading/researching (not implementing yet)
+- Completed work on something
 
 ## Important Notes
 

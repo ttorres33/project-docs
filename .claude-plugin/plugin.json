@@ -1,17 +1,18 @@
 {
   "name": "project-docs",
-  "version": "0.2.0",
-  "description": "Maintains project documentation with process-notes.md for work history, README.md for current state, and A/B test documentation",
+  "version": "0.3.0",
+  "description": "Maintains project documentation: README.md (what/how to use), ARCHITECTURE.md (design/patterns), process-notes.md (work history), and A/B test docs",
   "author": {
     "name": "Teresa Torres",
     "email": "contact@producttalk.org"
   },
-  "homepage": "https://github.com/ttorres33/project-docs",
-  "repository": "https://github.com/ttorres33/project-docs",
+  "homepage": "https://github.com/ttorres33/cc-plugins",
+  "repository": "https://github.com/ttorres33/cc-plugins",
   "keywords": [
     "documentation",
     "process-notes",
     "readme",
+    "architecture",
     "project-history",
     "context-management",
     "ab-test",
