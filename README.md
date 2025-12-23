@@ -10,7 +10,7 @@ A Claude Code plugin for maintaining project documentation:
 ## Installation
 
 ```bash
-claude plugins add cc-plugins/project-docs
+claude plugins add teresa-torres-plugins/project-docs
 ```
 
 ## Commands
