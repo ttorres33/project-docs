@@ -1,6 +1,6 @@
 {
   "name": "project-docs",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Maintains project documentation: README.md (what/how to use), ARCHITECTURE.md (design/patterns), process-notes.md (work history), and A/B test docs",
   "author": {
     "name": "Teresa Torres",

@@ -1,6 +1,6 @@
 ---
 name: process-notes
-description: Maintains comprehensive project history in process-notes.md that documents work process, decisions, dead ends, and progress. Use when context window fills up (approaching 90% of token budget), when making key decisions or reaching milestones, or when user explicitly requests /process-notes command.
+description: Maintains comprehensive project history in process-notes.md that documents work process, decisions, dead ends, and progress. Use when context window fills up (approaching 60% of token budget), when making key decisions or reaching milestones, or when user explicitly requests /process-notes command.
 allowed-tools: Read, Edit, Write, Glob, Bash, Grep
 ---
 
@@ -13,20 +13,13 @@ Maintain a comprehensive project history in `process-notes.md` that documents ou
 
 Update `process-notes.md` when any of these conditions occur:
 
-1. **Context window fills up** - When approaching ~90% of token budget, create an entry before context gets compacted
+1. **Context window fills up** - When approaching ~60% of token budget, create an entry before context gets compacted
 2. **Key decision or milestone** - When we make an important architectural decision, complete a major feature, or reach a significant milestone
 3. **Explicit user request** - When user invokes `/process-notes` command
 
 ## How to Update
 
-1. **Ensure .gitignore is configured** - Before creating or updating `process-notes.md`, ensure it's excluded from git
-   - Check if project is a git repository by looking for `.git` directory
-   - If git repo exists, check if `.gitignore` exists
-   - If `.gitignore` exists, check if `process-notes.md` is already listed
-   - If not listed, append `process-notes.md` to `.gitignore`
-   - If `.gitignore` doesn't exist and this is a git repo, create it with `process-notes.md`
-   - Rationale: process-notes.md is internal working documentation, not meant for version control
-2. **Read existing file** - Always read `process-notes.md` first to understand current state and append new entries
+1. **Tail the existing file** - Always tail `process-notes.md` first to understand recent entries and append new entries
 3. **Create comprehensive entry** - Use the structured format below with detailed technical information
 4. **Append to file** - Add new entry at the bottom with timestamp
 5. **Preserve history** - Never remove or modify previous entries, only append
@@ -127,64 +120,6 @@ Use this exact structure for each entry:
 - Always create/update `process-notes.md` in the current working directory root
 - If file doesn't exist, create it with a title: `# Project Process Notes`
 - Always append new entries at the bottom, never modify existing entries
-
-## Gitignore Management
-
-Process-notes.md is internal working documentation and should NOT be committed to version control. Before creating or updating process-notes.md, ensure proper .gitignore configuration:
-
-### Step-by-step .gitignore check:
-
-1. **Check if git repository exists:**
-   ```bash
-   test -d .git && echo "Git repo" || echo "Not a git repo"
-   ```
-
-2. **If git repo exists, check for .gitignore:**
-   - Use Glob or Read to check if `.gitignore` exists in current directory
-
-3. **If .gitignore exists, check if process-notes.md is already listed:**
-   - Use Grep to search for `process-notes.md` in `.gitignore`
-   - Search pattern: `^process-notes\.md$` (exact match on its own line)
-
-4. **If not listed, add it:**
-   - Use Edit or Write to append `process-notes.md` to `.gitignore`
-   - Add a comment explaining why: `# Internal working documentation - not for version control`
-
-5. **If .gitignore doesn't exist (but git repo does), create it:**
-   - Create `.gitignore` with `process-notes.md` entry
-   - Add comment explaining the file's purpose
-
-### Example implementation:
-
-```bash
-# Check if git repo
-if [ -d .git ]; then
-  # Check if .gitignore exists
-  if [ -f .gitignore ]; then
-    # Check if process-notes.md is already in .gitignore
-    if ! grep -q "^process-notes\.md$" .gitignore; then
-      # Add it with a comment
-      echo "" >> .gitignore
-      echo "# Internal working documentation - not for version control" >> .gitignore
-      echo "process-notes.md" >> .gitignore
-    fi
-  else
-    # Create .gitignore with process-notes.md
-    cat > .gitignore << 'EOF'
-# Internal working documentation - not for version control
-process-notes.md
-EOF
-  fi
-fi
-```
-
-### Why this matters:
-
-- **process-notes.md is for internal use** - Contains work-in-progress thoughts, dead ends, and implementation details
-- **Not meant for external consumption** - Unlike README which is public-facing
-- **Privacy** - May contain internal reasoning or sensitive context
-- **Reduces noise** - Prevents cluttering repository with internal working documents
-- **Per-developer artifact** - Each developer/agent may have their own process notes
 
 ## Tone and Style
 
