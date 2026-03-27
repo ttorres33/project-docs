@@ -63,6 +63,29 @@ Arguments:
 - `test-name` (required): Name of the test
 - `file-path` (optional): Where to save. Defaults to `./{test-name}.md`
 
+### `/project-docs:all-docs`
+
+Update all project documentation by running these commands sequentially:
+1. `/project-docs:process-notes`
+2. `/project-docs:readme`
+3. `/project-docs:architecture`
+
+### `/project-docs:code-review`
+
+Launch the `code-reviewer` agent to review all uncommitted changes. The agent checks:
+- Consistency with ARCHITECTURE.md patterns
+- Error handling coverage
+- Test coverage (unit and integration)
+- Security (secrets, least-privilege, input validation, logging hygiene, CORS, dependencies)
+- Documentation (README, ARCHITECTURE.md, test.md, process-notes)
+
+### `/project-docs:plan-review`
+
+Launch the `plan-reviewer` agent to review the most recent plan in `.claude/plans/`. The agent checks:
+- Consistency with project architecture and patterns
+- Potential duplicates in the codebase
+- Unnecessary complexity that could be simplified
+
 ## Skills
 
 All commands have corresponding skills that Claude can invoke proactively:
@@ -76,6 +99,7 @@ All commands have corresponding skills that Claude can invoke proactively:
 
 ## Agents
 
+- **code-reviewer** - Reviews uncommitted code changes for consistency with project architecture, code quality, error handling, test coverage, security, and documentation. Use after writing code and before committing.
 - **plan-reviewer** - Reviews implementation plans for consistency with ARCHITECTURE.md, checks for duplicate code, and flags unnecessary complexity. Use after creating a plan and before implementation.
 
 ## When to Use Each
