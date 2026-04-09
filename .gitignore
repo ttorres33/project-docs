@@ -1,4 +1,10 @@
 .DS_Store
 
+# Python bytecode cache
+__pycache__/
+*.pyc
+
 # Internal working documentation - not for version control
-process-notes.md
+/process-notes.md
+/process-notes.md.archive
+/process-notes/

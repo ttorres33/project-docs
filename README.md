@@ -4,7 +4,7 @@ A Claude Code plugin for maintaining project documentation:
 
 - **README.md** - What is this and how do I use it (setup, deploy, test)
 - **ARCHITECTURE.md** - How is this designed and why (design, patterns, conventions)
-- **process-notes.md** - Work history documenting decisions, dead ends, and progress
+- **process-notes/** - Work history documenting decisions, dead ends, and progress. Each entry is a separate file named `YYYY-MM-DDTHHMM-slug.md` so writes stay atomic, grep works naturally, and reading recent entries is `ls -t process-notes/ | head -3`.
 - **A/B test docs** - Structured documentation for experiments and tests
 
 ## Installation
@@ -21,12 +21,27 @@ Show this README for help and usage information.
 
 ### `/project-docs:process-notes`
 
-Document current session progress to `process-notes.md`. Creates a comprehensive entry capturing:
+Document current session progress as a new file in `process-notes/`. Creates a comprehensive entry capturing:
 - What was accomplished with file references
 - Key decisions with rationale and alternatives considered
 - Dead ends: what didn't work, why, and what was done instead
 - Technical details: files created/modified, dependencies, configs
 - Next steps with context for the next session
+
+Each invocation writes a new file named `YYYY-MM-DDTHHMM-slug.md`. Existing entry files are never modified — every write is a new, self-contained entry. If the project still has a legacy flat `process-notes.md`, this command will refuse to run and tell you to convert first (see below).
+
+### `/project-docs:convert-flat-process-notes-to-dir`
+
+Migrate a project from the legacy single-file `process-notes.md` format to the per-entry `process-notes/` folder format. Run this once per project when you see the new skill refusing to write, or whenever you want to adopt the folder format.
+
+The skill:
+- Splits the flat file on every `## ` heading
+- Extracts a date from each heading when possible (handles `[YYYY-MM-DD HH:MM]`, `[YYYY-MM-DD]`, `YYYY-MM-DD:`, `Session: YYYY-MM-DD`, and fuzzy fallback for unusual formats)
+- Writes each entry as a separate file in `process-notes/`
+- Dated entries: `YYYY-MM-DDTHHMM-slug.md`
+- Undated entries (phase-based or topic-based): `NNNN-slug.md`, ordinal-prefixed
+- Renames the original to `process-notes.md.archive` as a safety net
+- Verifies the conversion (entry count + byte count) before reporting success
 
 ### `/project-docs:readme`
 
@@ -90,12 +105,23 @@ Launch the `plan-reviewer` agent to review the most recent plan in `.claude/plan
 
 All commands have corresponding skills that Claude can invoke proactively:
 
-- **process-notes** - Triggers when context window fills up (~90%), at key milestones, or on explicit request
+- **process-notes** - Triggers when context window fills up (~60%), at key milestones, or on explicit request. Writes each entry as a new file in `process-notes/`.
+- **convert-flat-process-notes-to-dir** - Migrates a legacy single-file `process-notes.md` to the `process-notes/` folder format. Triggered when the process-notes skill refuses to write or on explicit request.
 - **readme** - Triggers when setup/deploy/config changes occur, or on explicit request
 - **architecture** - Triggers when infrastructure/data model/patterns change, or on explicit request
 - **ab-test** - Triggers when user mentions running an A/B test, comparing variants, or wanting to measure something systematically
 
 **Note:** Claude doesn't consistently invoke skills automatically. Rely on the slash commands to ensure documentation gets updated.
+
+## Migrating Existing Projects
+
+If a project still has a legacy flat `process-notes.md`, the `process-notes` skill will refuse to write and ask you to migrate first. Run:
+
+```
+/project-docs:convert-flat-process-notes-to-dir
+```
+
+This splits the flat file into per-entry files under `process-notes/` and renames the original to `process-notes.md.archive` as a safety net. Once you've confirmed the conversion looks right, you can delete the archive.
 
 ## Agents
 
@@ -104,7 +130,7 @@ All commands have corresponding skills that Claude can invoke proactively:
 
 ## When to Use Each
 
-| Scenario | README | ARCHITECTURE | process-notes |
+| Scenario | README | ARCHITECTURE | process-notes/ |
 |----------|--------|--------------|---------------|
 | Added new feature | Yes (usage) | Maybe (if new pattern) | Yes (how/why) |
 | Changed deployment | Yes | No | Yes |

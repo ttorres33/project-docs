@@ -138,7 +138,7 @@ project/
 ### Focus on the "Why"
 - Don't just document what exists - explain why it's designed that way
 - Include trade-offs considered
-- Reference decisions from process-notes.md if helpful
+- Reference decisions from `process-notes/` if helpful
 
 ### Be Specific with Patterns
 - Show concrete code examples, not abstract descriptions

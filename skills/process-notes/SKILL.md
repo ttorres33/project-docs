@@ -1,37 +1,69 @@
 ---
 name: process-notes
-description: Maintains comprehensive project history in process-notes.md that documents work process, decisions, dead ends, and progress. Use when context window fills up (approaching 60% of token budget), when making key decisions or reaching milestones, or when user explicitly requests /process-notes command.
-allowed-tools: Read, Edit, Write, Glob, Bash, Grep
+description: Maintains comprehensive project history in a process-notes/ folder that documents work process, decisions, dead ends, and progress. Each entry is a separate file named by timestamp + slug. Use when context window fills up (approaching 60% of token budget), when making key decisions or reaching milestones, or when the user explicitly requests /project-docs:process-notes.
+allowed-tools: Read, Write, Glob, Grep, Bash
+user-invocable: true
 ---
 
 # Process Notes Documentation Skill
 
 ## Purpose
-Maintain a comprehensive project history in `process-notes.md` that documents our work process, decisions, dead ends, and progress. This creates a complete record that helps remember key decisions and provides full context for what happened and when.
+Maintain a comprehensive project history in a `process-notes/` folder that documents work process, decisions, dead ends, and progress. Each entry is a separate file so writes stay small and atomic, grep works naturally across the whole history, and reading recent entries is `ls -t process-notes/ | head -3`.
 
 ## When to Update
 
-Update `process-notes.md` when any of these conditions occur:
+Update process notes when any of these conditions occur:
 
 1. **Context window fills up** - When approaching ~60% of token budget, create an entry before context gets compacted
-2. **Key decision or milestone** - When we make an important architectural decision, complete a major feature, or reach a significant milestone
-3. **Explicit user request** - When user invokes `/process-notes` command
+2. **Key decision or milestone** - When making an important architectural decision, completing a major feature, or reaching a significant milestone
+3. **Explicit user request** - When user invokes `/project-docs:process-notes`
 
 ## How to Update
 
-1. **Tail the existing file** - Always tail `process-notes.md` first to understand recent entries and append new entries
-3. **Create comprehensive entry** - Use the structured format below with detailed technical information
-4. **Append to file** - Add new entry at the bottom with timestamp
-5. **Preserve history** - Never remove or modify previous entries, only append
+### Step 1: Check format
+
+Before writing anything, check which format the project is using:
+
+```bash
+ls -la process-notes.md process-notes/ 2>/dev/null
+```
+
+- **If `process-notes/` exists**: Use the new folder format. Proceed to step 2.
+- **If `process-notes.md` exists but `process-notes/` does not**: The project is using the legacy flat-file format. Stop and tell the user to run `/project-docs:convert-flat-process-notes-to-dir` first. Do not attempt to write anything until the conversion is done.
+- **If neither exists**: This is a fresh project. Create the `process-notes/` folder with `mkdir process-notes` and proceed to step 2.
+
+### Step 2: Read recent entries for context
+
+Before writing a new entry, read the most recent 2-3 entries so the new entry fits into the ongoing narrative:
+
+```bash
+ls -t process-notes/ | head -3
+```
+
+Then `Read` those files. Do not read the entire folder — just the recent ones.
+
+### Step 3: Build the new entry filename
+
+Filename format: `YYYY-MM-DDTHHMM-slug.md`
+
+- Use the current date and time (24-hour, minute precision, no seconds)
+- Slug: lowercase, alphanumeric + hyphens, derived from the entry title, no longer than ~60 chars
+- Example: `2026-04-08T1432-revise-process-notes-to-folder-model.md`
+
+If a file with the exact same name already exists (rare — only if two entries land in the same minute with the same title), append `-2`, `-3`, etc.
+
+### Step 4: Write the new entry
+
+Create the file with the structured content format below. Each file is self-contained — do NOT read, edit, or touch any other file in `process-notes/`.
 
 ## Entry Format
 
-Use this exact structure for each entry:
+Use this exact structure for each entry file:
 
 ```markdown
-## [YYYY-MM-DD HH:MM] Entry N: [Brief Title]
+# [Brief Title]
 
-**Context:** [Brief statement of what we were working on in this session/segment]
+**Context:** [Brief statement of what was being worked on in this session/segment]
 
 **Progress:**
 - Accomplished task 1
@@ -42,19 +74,19 @@ Use this exact structure for each entry:
 
 **Key Decisions:**
 - **Decision:** [What was decided]
-  - **Rationale:** [Why we chose this approach]
-  - **Alternatives considered:** [What else we looked at]
-  - **Trade-offs:** [What we gained/sacrificed]
+  - **Rationale:** [Why this approach was chosen]
+  - **Alternatives considered:** [What else was looked at]
+  - **Trade-offs:** [What was gained/sacrificed]
   - **Files affected:** `path/to/file.ts:lines`
 
 **Dead Ends & Lessons:**
-- **Attempted:** [What we tried]
+- **Attempted:** [What was tried]
   - **Implementation:** [Specific approach taken]
   - **Files involved:** `path/to/file.ts:lines`
   - **Error/Issue:** [What failed - include error messages if relevant]
   - **Why it failed:** [Root cause analysis]
-  - **What we learned:** [Key takeaway]
-  - **Solution:** [What we did instead and why it worked]
+  - **What was learned:** [Key takeaway]
+  - **Solution:** [What was done instead and why it worked]
 
 **Technical Details:**
 - New files created: [list with purpose]
@@ -70,9 +102,9 @@ Use this exact structure for each entry:
 **Questions/Blockers:**
 - Open questions that need answering
 - Blockers encountered that aren't resolved yet
-
----
 ```
+
+Note: the file starts with `# Title`, NOT `## [timestamp] Entry N: Title`. The timestamp lives in the filename, and there is no global entry numbering — each entry file is self-contained.
 
 ## Guidelines for Comprehensive Documentation
 
@@ -86,7 +118,7 @@ Use this exact structure for each entry:
 - Document architectural choices, library selections, pattern decisions
 - Always explain rationale - the "why" is crucial
 - List alternatives that were considered and why they weren't chosen
-- Describe trade-offs explicitly (what we gained vs. what we sacrificed)
+- Describe trade-offs explicitly (what was gained vs. what was sacrificed)
 - Include file references for where the decision is implemented
 
 ### Dead Ends & Lessons Section
@@ -117,9 +149,25 @@ Use this exact structure for each entry:
 
 ## File Location
 
-- Always create/update `process-notes.md` in the current working directory root
-- If file doesn't exist, create it with a title: `# Project Process Notes`
-- Always append new entries at the bottom, never modify existing entries
+- Always write new entries to `process-notes/` in the current working directory root
+- Each entry is its own file — never append to an existing entry file, never read the whole folder
+- Never modify existing entry files, only create new ones
+
+## Reading Recent Entries
+
+When starting a new session and needing context from past work:
+
+```bash
+ls -t process-notes/ | head -3
+```
+
+Then `Read` those files. For grep-style searches across all entries:
+
+```bash
+grep -r "pattern" process-notes/
+```
+
+Do not `Read` the whole folder — it grows unbounded over time and will waste context. If you need to search for something specific, use `Grep` with a pattern.
 
 ## Tone and Style
 
@@ -133,7 +181,7 @@ Use this exact structure for each entry:
 ## Example Entry
 
 ```markdown
-## [2025-11-17 14:32] Entry 1: Initial Authentication System
+# Initial Authentication System
 
 **Context:** Setting up user authentication for the web application. Need JWT-based auth with refresh tokens.
 
@@ -157,7 +205,7 @@ Use this exact structure for each entry:
   - **Files involved:** `src/auth/jwt.ts:23-34`
   - **Error/Issue:** Realized this is vulnerable to XSS attacks - localStorage accessible to any script
   - **Why it failed:** Security best practice is httpOnly cookies for refresh tokens to prevent XSS access
-  - **What we learned:** Never store sensitive tokens in localStorage, use httpOnly cookies instead
+  - **What was learned:** Never store sensitive tokens in localStorage, use httpOnly cookies instead
   - **Solution:** Implemented refresh token in httpOnly cookie in `src/routes/auth.ts:56-62`, removed from JWT payload
 
 **Technical Details:**
@@ -185,17 +233,15 @@ Use this exact structure for each entry:
 **Questions/Blockers:**
 - Should we implement 2FA now or in a later iteration?
 - Need to confirm password requirements (min length, complexity rules)
-
----
 ```
 
 ## When to Use Process-Notes vs README
 
 ### Use Process-Notes For:
-- **The journey** - How we got here, what we tried, why we made decisions
+- **The journey** - How we got here, what was tried, why decisions were made
 - **Historical context** - What happened when, in chronological order
 - **Learning from failures** - Dead ends, errors, what didn't work and why
-- **Decision rationale** - Why we chose X over Y, alternatives considered
+- **Decision rationale** - Why X was chosen over Y, alternatives considered
 - **Session continuity** - Context for next agent to pick up where we left off
 - **Work-in-progress** - Documenting as we go, even incomplete work
 
@@ -211,26 +257,26 @@ Use this exact structure for each entry:
 
 | Scenario | Process-Notes | README | Both? |
 |----------|--------------|--------|-------|
-| **Just added OAuth authentication** | Yes - Document why we chose OAuth, what we tried first, implementation decisions | Yes - Update to show OAuth is now available, how to configure it | Both |
-| **Debugged tricky issue for 2 hours** | Yes - Document the debugging journey, what we learned, the solution | No - Unless it changes how the project works or needs documentation | Process-Notes only |
+| **Just added OAuth authentication** | Yes - Document why OAuth was chosen, what was tried first, implementation decisions | Yes - Update to show OAuth is now available, how to configure it | Both |
+| **Debugged tricky issue for 2 hours** | Yes - Document the debugging journey, what was learned, the solution | No - Unless it changes how the project works or needs documentation | Process-Notes only |
 | **Refactored file structure but behavior unchanged** | Maybe - If significant decisions were made about structure | Maybe - If file paths in docs need updating | Use judgment |
-| **Added new feature (e.g., export to CSV)** | Yes - How we built it, libraries chosen, design decisions | Yes - Update features list, add usage example | Both |
-| **Changed API endpoint structure** | Yes - Why we changed it, migration path, breaking change reasoning | Yes - Update API docs to reflect new structure | Both |
+| **Added new feature (e.g., export to CSV)** | Yes - How it was built, libraries chosen, design decisions | Yes - Update features list, add usage example | Both |
+| **Changed API endpoint structure** | Yes - Why it changed, migration path, breaking change reasoning | Yes - Update API docs to reflect new structure | Both |
 | **Fixed bug that restores documented behavior** | Maybe - Only if debugging revealed important insights | No - Behavior already documented correctly | Usually Process-Notes only |
-| **Added environment variable** | Yes - Why we needed it, what we considered | Yes - Update configuration section | Both |
-| **Spent time researching library options** | Yes - What we evaluated, pros/cons, final choice | No - Unless we actually added the library | Process-Notes only (until implementation) |
+| **Added environment variable** | Yes - Why it was needed, what was considered | Yes - Update configuration section | Both |
+| **Spent time researching library options** | Yes - What was evaluated, pros/cons, final choice | No - Unless the library was actually added | Process-Notes only (until implementation) |
 | **Reorganized code but kept same public API** | Maybe - If architectural decisions were made | No - Internal structure doesn't affect users | Usually Process-Notes only |
-| **Context window approaching 90%** | Yes - Checkpoint current progress | No - Unless meaningful changes to document | Process-Notes only (checkpoint) |
-| **Completed major milestone** | Yes - Document what we accomplished, decisions made | Maybe - If milestone adds/changes features | Process-Notes always, README if user-facing changes |
+| **Context window approaching 60%** | Yes - Checkpoint current progress | No - Unless meaningful changes to document | Process-Notes only (checkpoint) |
+| **Completed major milestone** | Yes - Document what was accomplished, decisions made | Maybe - If milestone adds/changes features | Process-Notes always, README if user-facing changes |
 
 ### Quick Decision Guide
 
 **Update Process-Notes if:**
-- We made a decision (any decision worth remembering)
-- We hit a dead end or learned something
+- A decision was made (any decision worth remembering)
+- A dead end was hit or something was learned
 - Context window is getting full
-- We completed work on something (even if not fully done)
-- Future us needs to understand why we did something
+- Work was completed on something (even if not fully done)
+- Future agents need to understand why something was done
 
 **Update README if:**
 - External behavior changed (how users interact with it)
@@ -240,9 +286,9 @@ Use this exact structure for each entry:
 - Architecture changed in a way that affects understanding
 
 **Update both if:**
-- We added a new feature (process-notes: how/why, README: what it does)
-- We made breaking changes (process-notes: migration reasoning, README: new API)
-- We changed project structure in user-visible ways
+- A new feature was added (process-notes: how/why, README: what it does)
+- Breaking changes were made (process-notes: migration reasoning, README: new API)
+- Project structure changed in user-visible ways
 
 **Update neither if:**
 - Pure code cleanup with no behavioral change
@@ -252,10 +298,10 @@ Use this exact structure for each entry:
 
 ## Important Notes
 
-- **Be comprehensive** - This is our project memory, capture everything important
+- **Be comprehensive** - This is the project's memory, capture everything important
 - **Always include technical details** - File paths, line numbers, function names, error messages
 - **Document the why** - Decisions and reasoning are more valuable than just what was done
 - **Learn from failures** - Dead ends section is crucial for avoiding repeated mistakes
 - **Provide context for next session** - Future agents need to pick up smoothly
-- **Process-Notes is internal** - Written for us, not external users
-- **Process-Notes is append-only** - Never delete history, always add to it
+- **Process-Notes is internal** - Written for the team, not external users
+- **Each entry file is immutable** - Never edit an existing entry, always create a new file
