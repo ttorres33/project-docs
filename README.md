@@ -28,6 +28,8 @@ Document current session progress as a new file in `process-notes/`. Creates a c
 - Technical details: files created/modified, dependencies, configs
 - Next steps with context for the next session
 
+Entries do not record commit, push, or deploy status. A note is written before the commit and the deploy, so those lines go stale within minutes. The one exception is a deployment that is deliberately on hold, which goes under Questions/Blockers with the reason.
+
 Each invocation writes a new file named `YYYY-MM-DDTHHMM-slug.md`. Existing entry files are never modified — every write is a new, self-contained entry. If the project still has a legacy flat `process-notes.md`, this command will refuse to run and tell you to convert first (see below).
 
 ### `/project-docs:convert-flat-process-notes-to-dir`
@@ -35,13 +37,18 @@ Each invocation writes a new file named `YYYY-MM-DDTHHMM-slug.md`. Existing entr
 Migrate a project from the legacy single-file `process-notes.md` format to the per-entry `process-notes/` folder format. Run this once per project when you see the new skill refusing to write, or whenever you want to adopt the folder format.
 
 The skill:
-- Splits the flat file on every `## ` heading
-- Extracts a date from each heading when possible (handles `[YYYY-MM-DD HH:MM]`, `[YYYY-MM-DD]`, `YYYY-MM-DD:`, `Session: YYYY-MM-DD`, and fuzzy fallback for unusual formats)
+- Runs a dry run first and reviews the planned files with their byte sizes, looking for tiny fragments, template-looking titles, or one oversized file, before converting anything
+- Splits the flat file on `## ` headings that sit outside fenced code blocks (a `## ` line inside a code block is content, not an entry boundary)
+- Promotes `### ` headings to their own entries when they match the file's own `## ` naming convention (`Phase N`, `Session N`, `Entry N`, or `[YYYY-MM-DD]`), rescuing entries that were appended as sub-headings under whatever section came last
+- Extracts a date from each heading when possible (handles `[YYYY-MM-DD HH:MM]`, `[YYYY-MM-DD]`, `YYYY-MM-DD:`, `Session: YYYY-MM-DD`, month-name forms like `Nov 17, 2025`, and a fuzzy fallback for unusual formats)
+- Drops a heading left with no content of its own, and says so
 - Writes each entry as a separate file in `process-notes/`
 - Dated entries: `YYYY-MM-DDTHHMM-slug.md`
 - Undated entries (phase-based or topic-based): `NNNN-slug.md`, ordinal-prefixed
 - Renames the original to `process-notes.md.archive` as a safety net
-- Verifies the conversion (entry count + byte count) before reporting success
+- Verifies the conversion (file count against the script's own reported count, plus byte count) before reporting success
+
+If an earlier conversion produced bad output and the archive is still present, the skill can regenerate the folder from it. See "Re-converting after a bad conversion" in the skill for the preconditions and reset steps.
 
 ### `/project-docs:readme`
 
@@ -121,7 +128,7 @@ If a project still has a legacy flat `process-notes.md`, the `process-notes` ski
 /project-docs:convert-flat-process-notes-to-dir
 ```
 
-This splits the flat file into per-entry files under `process-notes/` and renames the original to `process-notes.md.archive` as a safety net. Once you've confirmed the conversion looks right, you can delete the archive.
+This splits the flat file into per-entry files under `process-notes/` and renames the original to `process-notes.md.archive` as a safety net. Review the dry-run listing it shows before confirming. Once you've confirmed the conversion looks right, you can delete the archive. Keep it until then: it is what a re-conversion rebuilds from.
 
 ## Agents
 
