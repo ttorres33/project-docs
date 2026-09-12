@@ -97,7 +97,7 @@ Use this exact structure for each entry file:
 **Next Steps:**
 - [ ] Task 1 - [with enough context to understand what/why]
 - [ ] Task 2 - [reference to relevant files/functions if helpful]
-- **Context for next session:** [Anything the next agent needs to know to pick up smoothly]
+- **Context for next session:** [Anything the next agent needs to know to pick up smoothly: state of the work, not commit or deploy status]
 
 **Questions/Blockers:**
 - Open questions that need answering
@@ -141,6 +141,13 @@ Note: the file starts with `# Title`, NOT `## [timestamp] Entry N: Title`. The t
 - Provide enough context that next agent can pick up without full conversation history
 - Reference relevant files/functions when helpful
 - Add "Context for next session" with any important state or decisions that affect next work
+- Do not list commit, push, or deploy as next steps (see "Do Not Record Commit or Deploy Status" below)
+
+### Do Not Record Commit or Deploy Status
+- Process notes are written before the commit and before the deploy. Any statement about whether work is committed, pushed, or deployed is stale minutes after the file is written, and a future reader will trust it anyway.
+- Never write "not yet committed", "not yet deployed", "deployed to dev only", "Teresa still needs to deploy", or a "Deploy to prod" checkbox in Next Steps. Commit, push, and deploy are the normal end of every session, not open work.
+- Git history and the AWS console are the sources of truth for what shipped and when.
+- **The one exception:** a deployment that is deliberately being held back. Record it under Questions/Blockers with the reason and the condition for releasing it, e.g. "Prod deploy on hold until the GSI backfill finishes, see `template.yaml:120`." If there is no reason to hold, say nothing about deployment.
 
 ### Questions/Blockers Section
 - Document open questions that need user input
@@ -303,5 +310,6 @@ Do not `Read` the whole folder — it grows unbounded over time and will waste c
 - **Document the why** - Decisions and reasoning are more valuable than just what was done
 - **Learn from failures** - Dead ends section is crucial for avoiding repeated mistakes
 - **Provide context for next session** - Future agents need to pick up smoothly
+- **Don't record commit or deploy status** - It goes stale the moment the session ends; only note a deployment that is deliberately on hold, with the reason
 - **Process-Notes is internal** - Written for the team, not external users
 - **Each entry file is immutable** - Never edit an existing entry, always create a new file
