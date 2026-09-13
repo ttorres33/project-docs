@@ -132,5 +132,6 @@ Then run steps 2 through 6 above from the top, including the dry run. Restore an
 
 - The script is deliberately permissive about heading formats — it never refuses to convert based on how an entry is titled. Its two structural rules (skip fenced `## ` lines, promote convention-matching `### ` lines) exist because real files quote markdown inside code blocks and append late entries under the wrong heading level. The guiding principle is still "never lose content": nothing is dropped except headings with no body.
 - Undated entries get ordinal filenames (`0001-slug.md`, `0002-slug.md`, ...) and sort before dated entries. This is intentional for files that mix static topic sections with dated entries — the topic sections end up at the top of the folder listing.
+- The converted folder is flat. The next `/project-docs:process-notes` run files the dated entries into `YYYY-MM/` folders and the ordinal ones into `no-date/`.
 - The script reads the whole file into memory. That is fine for any realistic process-notes file.
 - Do NOT modify `process-notes.md.archive` after conversion. It is the user's safety net until they are confident the conversion worked.

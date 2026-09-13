@@ -8,7 +8,7 @@ user-invocable: true
 # Process Notes Documentation Skill
 
 ## Purpose
-Maintain a comprehensive project history in a `process-notes/` folder that documents work process, decisions, dead ends, and progress. Each entry is a separate file so writes stay small and atomic, grep works naturally across the whole history, and reading recent entries is `ls -t process-notes/ | head -3`.
+Maintain a comprehensive project history in a `process-notes/` folder that documents work process, decisions, dead ends, and progress. Each entry is a separate file so writes stay small and atomic and grep works naturally across the whole history. The top level of the folder holds only the current month's entries: before each new entry is written, older months are filed into `process-notes/YYYY-MM/` folders and undated entries into `process-notes/no-date/`, so the folder stays readable as it grows.
 
 ## When to Update
 
@@ -30,19 +30,40 @@ ls -la process-notes.md process-notes/ 2>/dev/null
 
 - **If `process-notes/` exists**: Use the new folder format. Proceed to step 2.
 - **If `process-notes.md` exists but `process-notes/` does not**: The project is using the legacy flat-file format. Stop and tell the user to run `/project-docs:convert-flat-process-notes-to-dir` first. Do not attempt to write anything until the conversion is done.
-- **If neither exists**: This is a fresh project. Create the `process-notes/` folder with `mkdir process-notes` and proceed to step 2.
+- **If neither exists**: This is a fresh project. Create the `process-notes/` folder with `mkdir process-notes` and proceed to step 3 (there is nothing to tidy yet).
 
-### Step 2: Read recent entries for context
+### Step 2: Tidy older entries into month folders
+
+The top level of `process-notes/` holds only the current month's entries. Before reading or writing anything, run the tidy script so older entries are filed away:
+
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/process-notes/scripts/tidy.py process-notes
+```
+
+The script looks only at the top level of the folder and:
+- Moves every `YYYY-MM-DDTHHMM-slug.md` entry dated before the current month into `process-notes/YYYY-MM/`, creating the folder if needed. The month comes from the filename, never from the file's modification time.
+- Moves every other `.md` file at the top level into `process-notes/no-date/`. This catches the `NNNN-slug.md` entries the converter writes for undated sections, and anything else without a date prefix.
+- Leaves the current month's entries where they are, and never looks inside existing folders.
+- Never overwrites. If the destination already exists, or an entry is dated after the current month, the file stays put and is named in the output.
+- Prints what it moved, grouped by folder, or `Nothing to move.`
+
+Files are renamed, never rewritten. Add `--dry-run` to print the plan without moving anything.
+
+If the script moved anything, tell the user in one line, for example: "Tidied process-notes/: 14 entries into 2026-08/, 3 into 2026-07/." In a repo that tracks `process-notes/`, the moves show up as renames once staged with `git add -A process-notes/`. If the script printed `Nothing to move.`, say nothing about it. If it exits non-zero, show the error and stop.
+
+### Step 3: Read recent entries for context
 
 Before writing a new entry, read the most recent 2-3 entries so the new entry fits into the ongoing narrative:
 
 ```bash
-ls -t process-notes/ | head -3
+find process-notes -name '*.md' -not -path '*/no-date/*' | sort -r | head -3
 ```
+
+This searches the month folders too, and sorts by path, which for this layout is date order (`2026-08/2026-08-30T...` sorts before `2026-09-01T...`). The `no-date/` folder is excluded because its entries carry no date and would otherwise sort ahead of everything. Do not use `ls -t`: it lists folders alongside files, and git resets file modification times.
 
 Then `Read` those files. Do not read the entire folder — just the recent ones.
 
-### Step 3: Build the new entry filename
+### Step 4: Build the new entry filename
 
 Filename format: `YYYY-MM-DDTHHMM-slug.md`
 
@@ -52,9 +73,9 @@ Filename format: `YYYY-MM-DDTHHMM-slug.md`
 
 If a file with the exact same name already exists (rare — only if two entries land in the same minute with the same title), append `-2`, `-3`, etc.
 
-### Step 4: Write the new entry
+### Step 5: Write the new entry
 
-Create the file with the structured content format below. Each file is self-contained — do NOT read, edit, or touch any other file in `process-notes/`.
+Create the file at the top level of `process-notes/` with the structured content format below. Each file is self-contained — do not read or edit any other file in `process-notes/`. The tidy in step 2 is the only thing that moves existing entries, and it never changes their content.
 
 ## Entry Format
 
@@ -156,19 +177,19 @@ Note: the file starts with `# Title`, NOT `## [timestamp] Entry N: Title`. The t
 
 ## File Location
 
-- Always write new entries to `process-notes/` in the current working directory root
+- Always write new entries to the top level of `process-notes/` in the current working directory root, never into a month folder
 - Each entry is its own file — never append to an existing entry file, never read the whole folder
-- Never modify existing entry files, only create new ones
+- Never modify existing entry files, only create new ones. The tidy script moves older entries into `YYYY-MM/` and `no-date/` folders, but never changes their content
 
 ## Reading Recent Entries
 
 When starting a new session and needing context from past work:
 
 ```bash
-ls -t process-notes/ | head -3
+find process-notes -name '*.md' -not -path '*/no-date/*' | sort -r | head -3
 ```
 
-Then `Read` those files. For grep-style searches across all entries:
+Then `Read` those files. For grep-style searches across all entries (`-r` already descends into the month folders):
 
 ```bash
 grep -r "pattern" process-notes/
@@ -312,4 +333,4 @@ Do not `Read` the whole folder — it grows unbounded over time and will waste c
 - **Provide context for next session** - Future agents need to pick up smoothly
 - **Don't record commit or deploy status** - It goes stale the moment the session ends; only note a deployment that is deliberately on hold, with the reason
 - **Process-Notes is internal** - Written for the team, not external users
-- **Each entry file is immutable** - Never edit an existing entry, always create a new file
+- **Each entry file is immutable** - Never edit an existing entry, always create a new file. The tidy step may move an entry into a month folder, but its content never changes

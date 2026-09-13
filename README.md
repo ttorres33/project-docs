@@ -4,7 +4,7 @@ A Claude Code plugin for maintaining project documentation:
 
 - **README.md** - What is this and how do I use it (setup, deploy, test)
 - **ARCHITECTURE.md** - How is this designed and why (design, patterns, conventions)
-- **process-notes/** - Work history documenting decisions, dead ends, and progress. Each entry is a separate file named `YYYY-MM-DDTHHMM-slug.md` so writes stay atomic, grep works naturally, and reading recent entries is `ls -t process-notes/ | head -3`.
+- **process-notes/** - Work history documenting decisions, dead ends, and progress. Each entry is a separate file named `YYYY-MM-DDTHHMM-slug.md`, so writes stay atomic and grep works naturally. The top level holds only the current month's entries; older months are filed into `YYYY-MM/` subfolders and undated entries into `no-date/` each time a new entry is written. Reading recent entries is `find process-notes -name '*.md' -not -path '*/no-date/*' | sort -r | head -3`.
 - **A/B test docs** - Structured documentation for experiments and tests
 
 ## Installation
@@ -30,7 +30,9 @@ Document current session progress as a new file in `process-notes/`. Creates a c
 
 Entries do not record commit, push, or deploy status. A note is written before the commit and the deploy, so those lines go stale within minutes. The one exception is a deployment that is deliberately on hold, which goes under Questions/Blockers with the reason.
 
-Each invocation writes a new file named `YYYY-MM-DDTHHMM-slug.md`. Existing entry files are never modified — every write is a new, self-contained entry. If the project still has a legacy flat `process-notes.md`, this command will refuse to run and tell you to convert first (see below).
+Before writing, the command tidies the folder. Every entry dated before the current month moves into `process-notes/YYYY-MM/`, and every other `.md` file at the top level (such as the `NNNN-slug.md` entries the converter writes for undated sections) moves into `process-notes/no-date/`. The month comes from the filename, not the file's modification time. Files are renamed, never edited or overwritten; a file whose destination already exists, or whose date is in the future, stays put and is named in the output. The current month's entries stay at the top level, so the folder stays readable as it grows.
+
+Each invocation writes a new file named `YYYY-MM-DDTHHMM-slug.md` at the top level. Existing entry files are never modified — the tidy step moves them, but every write is a new, self-contained entry. If the project still has a legacy flat `process-notes.md`, this command will refuse to run and tell you to convert first (see below).
 
 ### `/project-docs:convert-flat-process-notes-to-dir`
 
@@ -47,6 +49,8 @@ The skill:
 - Undated entries (phase-based or topic-based): `NNNN-slug.md`, ordinal-prefixed
 - Renames the original to `process-notes.md.archive` as a safety net
 - Verifies the conversion (file count against the script's own reported count, plus byte count) before reporting success
+
+The converted folder is flat. The next `/project-docs:process-notes` run files the dated entries into `YYYY-MM/` subfolders and the ordinal ones into `no-date/`.
 
 If an earlier conversion produced bad output and the archive is still present, the skill can regenerate the folder from it. See "Re-converting after a bad conversion" in the skill for the preconditions and reset steps.
 
@@ -112,7 +116,7 @@ Launch the `plan-reviewer` agent to review the most recent plan in `.claude/plan
 
 All commands have corresponding skills that Claude can invoke proactively:
 
-- **process-notes** - Triggers when context window fills up (~60%), at key milestones, or on explicit request. Writes each entry as a new file in `process-notes/`.
+- **process-notes** - Triggers when context window fills up (~60%), at key milestones, or on explicit request. Tidies older months into `process-notes/YYYY-MM/` subfolders, then writes each entry as a new file at the top level of `process-notes/`.
 - **convert-flat-process-notes-to-dir** - Migrates a legacy single-file `process-notes.md` to the `process-notes/` folder format. Triggered when the process-notes skill refuses to write or on explicit request.
 - **readme** - Triggers when setup/deploy/config changes occur, or on explicit request
 - **architecture** - Triggers when infrastructure/data model/patterns change, or on explicit request
